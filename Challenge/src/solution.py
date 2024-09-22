@@ -22,6 +22,12 @@ class Solution:
                     obj += time
                     loc = delivery.dropoff_loc
         return obj
+    
+    def check_feasible(self):
+        orderd = set([i.delivery_id for i in self.problem.deliveries])
+        delivered = set([i for sublist in self.routes.values() for i in sublist])
+        return True if orderd == delivered else False
+ 
 
     def construction_heuristic(self):
         """ construction of initial solution via greedy insertion and without stacking"""  # TODO replace by better method

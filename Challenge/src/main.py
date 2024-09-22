@@ -20,6 +20,7 @@ for instance in all_instances:
     print(problem.solution.routes)
     print(problem.solution.objective)
     print(problem.solution.eval())
+    print(problem.solution.check_feasible())
     
 
 # print([[len(i["couriers"]), len(i['deliveries'])] for i in all_instances])
