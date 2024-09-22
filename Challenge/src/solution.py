@@ -24,6 +24,11 @@ class Solution:
         return obj
     
     def check_feasible(self):
+        for route in self.routes.values():
+            tmp_deliveries = set(route)
+            for delivery in tmp_deliveries:
+                if route.count(delivery) != 2:
+                    return False
         orderd = set([i.delivery_id for i in self.problem.deliveries])
         delivered = set([i for sublist in self.routes.values() for i in sublist])
         return True if orderd == delivered else False
