@@ -2,6 +2,7 @@ import pathlib
 
 from problem import Problem
 import read_data
+import feasibility_checker
 
 # path to the folder training_data
 
@@ -9,6 +10,7 @@ import read_data
 type_of_instance = 'playground'
 
 instance_folder = pathlib.Path(__file__).parent.parent / type_of_instance
+solution_folder = pathlib.Path(__file__).parent.parent / 'solutions'
 
 all_instances = read_data.process_all_instances(instance_folder)
 
@@ -21,5 +23,9 @@ for instance in all_instances:
     print(problem.solution.objective)
     print(problem.solution.eval())
     print(problem.solution.eval())
+    problem.solution.save_to_csv(solution_folder)
 
 # print([[len(i["couriers"]), len(i['deliveries'])] for i in all_instances])
+
+# check for feasibility
+feasibility_checker.check_feasibility_files(instance_folder, solution_folder)

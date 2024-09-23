@@ -1,4 +1,5 @@
 import copy
+import csv
 
 class Solution:
     def __init__(self, problem):
@@ -69,5 +70,11 @@ class Solution:
             loc[driver_selected] = delivery.dropoff_loc
         return routes, objective
     
-    def save_to_csv(self):
-        pass  # TODO implement this method
+    def save_to_csv(self, path):
+        """ save the solution to a csv file """
+
+        with open(f"{path}/{self.problem.problem_id}.csv", 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=',')
+            writer.writerow(['ID'])
+            for courier_id, deliveries in self.routes.items():
+                writer.writerow([courier_id] + deliveries)

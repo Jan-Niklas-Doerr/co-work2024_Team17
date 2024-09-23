@@ -262,19 +262,10 @@ def get_delivery(deliveries, delivery_id):
 
 
 # Entry point of the script
-def main():
-  # Parse the command-line arguments
-  parser = argparse.ArgumentParser(
-    description="Process couriers, deliveries, and travel time matrices from multiple instances.")
-  parser.add_argument('parent_folder', type=str,
-                      help='Path to the parent folder containing all instance folders')
-  parser.add_argument('solution_folder', type=str,
-                      help='Path to the folder containing the solution files')
-
-  args = parser.parse_args()
+def check_feasibility_files(parent_folder, solution_folder):
 
   # Process all instances
-  all_instance_data = process_all_instances(args.parent_folder)
+  all_instance_data = process_all_instances(parent_folder)
 
   # Output the results
   for instance_data in all_instance_data:
@@ -292,9 +283,11 @@ def main():
     # for row in instance_data['travel_time']:
     #     print(row)
 
-    instance_name = instance_data['instance_name']
-    print(instance_name)
-    csv_file = args.solution_folder + instance_name + ".csv"  # Update with the actual path to your CSV
+    instance_name = instance_data['instance_name'] + ".csv"
+    # create path of the csv file
+    csv_file = solution_folder 
+
+    csv_file = solution_folder / instance_name  # Update with the actual path to your CSV
     routes = read_routes_from_csv(csv_file)
 
     # Print out the routes for verification
@@ -330,7 +323,3 @@ def main():
     if all_activities_covered and all_routes_are_feasible and all_couriers_covered:
       print("Total cost of feasible solution: " + str(total_cost))
 
-
-# Main execution
-if __name__ == "__main__":
-  main()
