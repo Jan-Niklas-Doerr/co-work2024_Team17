@@ -30,7 +30,7 @@ class Solution:
                 if route.count(delivery) != 2:
                     return False
         
-        # check capacity constraints.S
+        # check capacity constraints
 
         orderd = set([i.delivery_id for i in self.problem.deliveries])
         delivered = set([i for sublist in self.routes.values() for i in sublist])
@@ -50,7 +50,7 @@ class Solution:
             driver_selected = None
             for courier in self.problem.couriers:
                 c_id = courier.courier_id
-                if delivery.capacity >= courier.capacity:
+                if delivery.capacity > courier.capacity:
                     continue
                 else:
                     tmp_increase = max(times[c_id] + self.problem.travel_times[loc[c_id]-1][delivery.pickup_loc-1],
@@ -59,6 +59,7 @@ class Solution:
                     if tmp_increase < obj_increase:
                         obj_increase = tmp_increase
                         driver_selected = c_id
+
             routes[driver_selected].append(delivery.delivery_id)
             routes[driver_selected].append(delivery.delivery_id)
             objective += obj_increase
