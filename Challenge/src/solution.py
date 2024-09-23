@@ -6,10 +6,19 @@ class Solution:
         self.routes, self.objective = self.construction_heuristic()
 
     def eval(self):
+        """ evaluate the objective function of the solution, return float('inf') if infeasible """
+        
+        orderd = set([i.delivery_id for i in self.problem.deliveries])
+        delivered = set([i for sublist in self.routes.values() for i in sublist])
+        if orderd != delivered:
+            return (float('inf'), False)
+        
         obj = 0
         for courier in self.problem.couriers:
             time = 0
-            loc = courier.location
+            loc = int(courier.location)
+            capacity = int(courier.capacity)
+
             picked_up = {delivery_id: False for delivery_id in self.routes[courier.courier_id]}
             for delivery_id in self.routes[courier.courier_id]:
                 delivery = self.problem.map_deliveries[delivery_id]
@@ -17,25 +26,18 @@ class Solution:
                     time = max(time + self.problem.travel_times[loc-1][delivery.pickup_loc-1], delivery.time_window_start)
                     picked_up[delivery_id] = True
                     loc = delivery.pickup_loc
+                    capacity -= delivery.capacity
+                    if capacity < 0:
+                        return (float('inf'), False)
                 else:
                     time += self.problem.travel_times[loc-1][delivery.dropoff_loc-1]
                     obj += time
                     loc = delivery.dropoff_loc
-        return obj
-    
-    def check_feasible(self):
-        for route in self.routes.values():
-            tmp_deliveries = set(route)
-            for delivery in tmp_deliveries:
-                if route.count(delivery) != 2:
-                    return False
-        
-        # check capacity constraints
+                    capacity += delivery.capacity
+            if any([not picked_up[delivery_id] for delivery_id in self.routes[courier.courier_id]]):
+                return (float('inf'), False)
 
-        orderd = set([i.delivery_id for i in self.problem.deliveries])
-        delivered = set([i for sublist in self.routes.values() for i in sublist])
-        return True if orderd == delivered else False
- 
+        return (obj, True)
 
     def construction_heuristic(self):
         """ construction of initial solution via greedy insertion and without stacking"""  # TODO replace by better method
