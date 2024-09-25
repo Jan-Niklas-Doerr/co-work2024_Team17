@@ -21,6 +21,8 @@ class Solution:
             capacity = int(courier.capacity)
 
             picked_up = {delivery_id: False for delivery_id in self.routes[courier.courier_id]}
+            if len(picked_up) > 4:
+                return (float('inf'), False)
             for delivery_id in self.routes[courier.courier_id]:
                 delivery = self.problem.map_deliveries[delivery_id]
                 if not picked_up[delivery_id]:
@@ -35,6 +37,9 @@ class Solution:
                     obj += time
                     loc = delivery.dropoff_loc
                     capacity += delivery.capacity
+
+            if time > 180:
+                return (float('inf'), False)
             if any([not picked_up[delivery_id] for delivery_id in self.routes[courier.courier_id]]):
                 return (float('inf'), False)
 
@@ -55,11 +60,14 @@ class Solution:
                 c_id = courier.courier_id
                 if delivery.capacity > courier.capacity:
                     continue
+                if len(routes[c_id]) == 4:
+                    continue
                 else:
                     tmp_increase = max(times[c_id] + self.problem.travel_times[loc[c_id]-1][delivery.pickup_loc-1],
                                         delivery.time_window_start) \
                                         + self.problem.travel_times[delivery.pickup_loc-1][delivery.dropoff_loc-1]
-                    if tmp_increase < obj_increase:
+                    
+                    if tmp_increase < obj_increase and tmp_increase <= 180:
                         obj_increase = tmp_increase
                         driver_selected = c_id
 
