@@ -199,7 +199,7 @@ def check_all_activities_covered(routes, couriers, deliveries):
   return all_activities_are_covered
 
 
-def is_feasible(route, couriers, deliveries):
+def is_feasible(route, couriers, deliveries, traveltimes):
   courier = get_courier(couriers, route.rider_id)
   courierCapacity = courier.capacity
   load = 0
@@ -220,7 +220,46 @@ def is_feasible(route, couriers, deliveries):
     print(
       f"Route of courier {route.rider_id} only has a pickup for deliveries {orders_in_bag}.")
     return False
+
+  if not check_route_length(route):
+    print(
+      f"Route of courier {route.rider_id} contains more than four deliveries.")
+    return False
+
+  if not check_route_duration(route, couriers, deliveries, traveltimes):
+    return False
+
   return True
+
+
+def check_route_duration(route, couriers, deliveries, travelTimes):
+  currentTime = 0
+  orders_in_bag = set()
+  courier = get_courier(couriers, route.rider_id)
+  lastLocation = courier.location
+  for activity in route.stops:
+    delivery = get_delivery(deliveries, activity)
+    if activity in orders_in_bag:
+      orders_in_bag.remove(activity)
+      currentTime = currentTime + travelTimes[lastLocation - 1][
+        delivery.dropoff_loc - 1]
+      lastLocation = delivery.dropoff_loc
+    else:
+      orders_in_bag.add(activity)
+      currentTime = max(delivery.time_window_start,
+                        currentTime + travelTimes[lastLocation - 1][
+                          delivery.pickup_loc - 1])
+      lastLocation = delivery.pickup_loc
+
+  if currentTime > 180:
+    print(
+      f"Route of courier {route.rider_id} is takes too long with {currentTime} minutes.")
+    return False
+
+  return True
+
+def check_route_length(route):
+  return len(route.stops) <= 8
 
 
 def get_route_cost(route, couriers, deliveries, travelTimes):
@@ -262,10 +301,19 @@ def get_delivery(deliveries, delivery_id):
 
 
 # Entry point of the script
-def check_feasibility_files(parent_folder, solution_folder):
+def main():
+  # Parse the command-line arguments
+  parser = argparse.ArgumentParser(
+    description="Process couriers, deliveries, and travel time matrices from multiple instances.")
+  parser.add_argument('parent_folder', type=str,
+                      help='Path to the parent folder containing all instance folders')
+  parser.add_argument('solution_folder', type=str,
+                      help='Path to the folder containing the solution files')
+
+  args = parser.parse_args()
 
   # Process all instances
-  all_instance_data = process_all_instances(parent_folder)
+  all_instance_data = process_all_instances(args.parent_folder)
 
   # Output the results
   for instance_data in all_instance_data:
@@ -283,11 +331,9 @@ def check_feasibility_files(parent_folder, solution_folder):
     # for row in instance_data['travel_time']:
     #     print(row)
 
-    instance_name = instance_data['instance_name'] + ".csv"
-    # create path of the csv file
-    csv_file = solution_folder 
-
-    csv_file = solution_folder / instance_name  # Update with the actual path to your CSV
+    instance_name = instance_data['instance_name']
+    print(instance_name)
+    csv_file = args.solution_folder + instance_name + ".csv"  # Update with the actual path to your CSV
     routes = read_routes_from_csv(csv_file)
 
     # Print out the routes for verification
@@ -308,7 +354,8 @@ def check_feasibility_files(parent_folder, solution_folder):
     all_routes_are_feasible = True
     for route in routes:
       route_is_feasible = is_feasible(route, instance_data['couriers'],
-                                      instance_data['deliveries'])
+                                      instance_data['deliveries'],
+                                      instance_data['travel_time'])
       if not route_is_feasible:
         print("Route of courier " + str(route.rider_id) + " is not feasible!")
         all_routes_are_feasible = False
@@ -323,3 +370,7 @@ def check_feasibility_files(parent_folder, solution_folder):
     if all_activities_covered and all_routes_are_feasible and all_couriers_covered:
       print("Total cost of feasible solution: " + str(total_cost))
 
+
+# Main execution
+if __name__ == "__main__":
+  main()
