@@ -2,11 +2,12 @@ import pathlib
 
 from problem import Problem
 import read_data
-import Challenge.src.feasibility_checker as feasibility_checker
+import feasibility_checker
 
 # path to the folder training_data
 
 # type_of_instance = 'training_data'
+# type_of_instance = 'training_data_hard'
 type_of_instance = 'playground'
 
 instance_folder = pathlib.Path(__file__).parent.parent / type_of_instance
@@ -20,8 +21,9 @@ for instance in all_instances:
     # print(problem.couriers)
     # print(problem.travel_times)
     # print(problem.solution.routes)
-    # print(problem.solution.objective)
-    # print(problem.solution.eval())
+    print(problem.solution.objective)
+    problem.solution.improve_tours()
+    print(problem.solution.eval())
     # print(problem.solution.eval())
     # problem.solution.save_to_csv(solution_folder)
     # print(sum([1 for i in problem.solution.routes.values() if len(i) == 2]))
