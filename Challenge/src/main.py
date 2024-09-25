@@ -2,7 +2,7 @@ import pathlib
 
 from problem import Problem
 import read_data
-import feasibility_checker
+import Challenge.feasibility_checker as feasibility_checker
 
 # path to the folder training_data
 
