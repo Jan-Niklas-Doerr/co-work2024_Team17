@@ -22,7 +22,7 @@ for instance in all_instances:
     # print(problem.travel_times)
     # print(problem.solution.routes)
     print(problem.solution.objective)
-    problem.solution.improve_tours()
+    problem.solution.improve_matching(N=1000)
     print(problem.solution.eval())
     # print(problem.solution.eval())
     # problem.solution.save_to_csv(solution_folder)

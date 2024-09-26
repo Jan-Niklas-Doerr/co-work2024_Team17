@@ -3,7 +3,7 @@ import csv
 import random
 import warnings
 
-from heuristics import n_opt_route
+from heuristics import n_opt_route, two_opt_bwtn_couriers
 
 class Solution:
     def __init__(self, problem):
@@ -112,7 +112,37 @@ class Solution:
         for courier_id in self.routes.keys():
             imp_pos = True
             while(imp_pos):
-                imp_pos = n_opt_route(self, courier_id, 1)
+                imp_pos = n_opt_route(self, courier_id, 2)
+
+    def improve_matching(self, N):
+        threshold = 0.2
+        steps = int(N/10)
+
+        new_solution = copy.deepcopy(self)
+
+        non_empty_couriers = [courier_id for courier_id, deliveries in self.routes.items() if len(deliveries) > 0]
+        if len(non_empty_couriers) < 2:
+            new_solution.improve_tours()
+        else:
+            for n in range(N):
+                if n % steps == 0:
+                    threshold /= 2
+                couriers = random.sample(non_empty_couriers, 2)
+                two_opt_bwtn_couriers(new_solution, couriers, threshold=threshold)
+                for courier in couriers:
+                    imp_pos = True
+                    while(imp_pos):
+                        imp_pos = n_opt_route(new_solution, courier, 2)
+
+        if new_solution.objective < self.objective:
+            self = new_solution
+
+    def achieve_feasibility(self, N):
+        if not self.feasible:
+            non_empty_couriers = [courier_id for courier_id, deliveries in self.routes.items() if len(deliveries) > 0]
+            for _ in range(N):
+                courier_1, courier_2 = random.sample(non_empty_couriers, 2)
+                two_opt_bwtn_couriers(self, [courier_1, courier_2])
     
     def save_to_csv(self, path):
         """ save the solution to a csv file """
