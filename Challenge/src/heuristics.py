@@ -54,7 +54,7 @@ def n_opt_route(solution, courier_id, arity):
             obj, driver_dict, feasible = new_solution.eval(selected_couriers=[courier_id])
             if feasible and obj < initial_obj:
                 new_solution.objective += obj - initial_obj
-                new_solution.objective_driver[courier_id[0]] = driver_dict[courier_id[0]]
+                new_solution.objective_driver[courier_id] = driver_dict[courier_id]
                 solution = new_solution
                 return True
     return False

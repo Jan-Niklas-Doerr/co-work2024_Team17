@@ -88,7 +88,7 @@ class Solution:
             if driver_selected is None:
                 # no feasible assigment found
                 feasible = False
-                warnings.warn(f"no feasible assignment found for delivery {delivery.delivery_id}, random assigment. infeasible solution")
+                # warnings.warn(f"no feasible assignment found for delivery {delivery.delivery_id}, random assigment. infeasible solution")
                 driver_selected = random.choice(list(self.problem.couriers)).courier_id
                 routes[driver_selected].append(delivery.delivery_id)
                 routes[driver_selected].append(delivery.delivery_id)
@@ -108,21 +108,22 @@ class Solution:
                 loc[driver_selected] = delivery.dropoff_loc
         return routes, obj_driver, objective, feasible
     
-    def improve_tours(self):
+    def improve_tours(self, N):
         for courier_id in self.routes.keys():
-            imp_pos = True
-            while(imp_pos):
-                imp_pos = n_opt_route(self, courier_id, 2)
+            for _ in range(N):
+                n_opt_route(self, courier_id, 2)
 
     def improve_matching(self, N):
-        threshold = 0.2
+        if self.problem.number_of_deliveries > 100:
+            N *= 2
+        threshold = 0.5
         steps = int(N/10)
 
         new_solution = copy.deepcopy(self)
 
         non_empty_couriers = [courier_id for courier_id, deliveries in self.routes.items() if len(deliveries) > 0]
         if len(non_empty_couriers) < 2:
-            new_solution.improve_tours()
+            new_solution.improve_tours(N)
         else:
             for n in range(N):
                 if n % steps == 0:
@@ -130,9 +131,8 @@ class Solution:
                 couriers = random.sample(non_empty_couriers, 2)
                 two_opt_bwtn_couriers(new_solution, couriers, threshold=threshold)
                 for courier in couriers:
-                    imp_pos = True
-                    while(imp_pos):
-                        imp_pos = n_opt_route(new_solution, courier, 2)
+                    for _ in range(2):
+                        n_opt_route(new_solution, courier, 2)
 
         if new_solution.objective < self.objective:
             self = new_solution
